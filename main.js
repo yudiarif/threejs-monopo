@@ -110,7 +110,7 @@ window.addEventListener("resize", () => {
   composer.setSize(sizes.width, sizes.height);
 });
 
-////RE-render responsive camera
+//RE-render responsive camera
 const loop = () => {
   material.uniforms.uTime.value += 0.003; //uTime value for shaders
   fresnelMaterial.uniforms.tCube.value = cubeRenderTarget.texture;
