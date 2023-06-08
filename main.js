@@ -13,7 +13,9 @@ import { DotScreenShader } from "./src/js/customShaders";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+import GUI from "lil-gui";
 
+const gui = new GUI();
 ////SCENE
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xffffff);
@@ -45,6 +47,7 @@ const fresnelMaterial = new THREE.ShaderMaterial({
   vertexShader: vertexShaderFresnel,
   fragmentShader: fragmentShaderFresnl,
   side: THREE.DoubleSide,
+  //wireframe: true,
 
   uniforms: { tCube: { value: 0 } },
 });
@@ -73,7 +76,9 @@ scene.add(fillLight);
 
 ////Camera
 const camera = new THREE.PerspectiveCamera(70, sizes.width / sizes.height);
-camera.position.z = 1.5;
+camera.position.x = -0.37;
+camera.position.y = -0.2;
+camera.position.z = 1.4;
 scene.add(camera);
 
 ///Renderer
@@ -82,6 +87,9 @@ const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(2);
 renderer.render(scene, camera);
+miniSphere.position.x = 0.24;
+miniSphere.position.y = 0.34;
+miniSphere.position.z = 0.82;
 
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
@@ -91,10 +99,10 @@ effect1.uniforms["scale"].value = 4;
 composer.addPass(effect1);
 
 ///Controls
-const controls = new OrbitControls(camera, canvas);
+const controls = new OrbitControls(camera, canvas, mesh);
 controls.enableDamping = true;
-controls.enablePan = true;
-controls.enableZoom = true;
+// controls.enablePan = true;
+//controls.enableZoom = false;
 //controls.autoRotate = false;
 //controls.autoRotateSpeed = 1;
 
@@ -112,13 +120,12 @@ window.addEventListener("resize", () => {
 
 //RE-render responsive camera
 const loop = () => {
-  material.uniforms.uTime.value += 0.003; //uTime value for shaders
+  material.uniforms.uTime.value += 0.007; //uTime value for shaders
   fresnelMaterial.uniforms.tCube.value = cubeRenderTarget.texture;
   miniSphere.visible = false;
   cubeCamera.update(renderer, scene);
   miniSphere.visible = true;
-  //mesh.visible = false;
-  controls.update();
+  //controls.update();
   renderer.render(scene, camera);
   composer.render(scene, camera);
 
@@ -127,3 +134,16 @@ const loop = () => {
 
 console.log(fresnelMaterial.uniforms.tCube);
 loop();
+
+// GUI
+const cameraFolder = gui.addFolder("camera");
+cameraFolder.add(camera.position, "z", 0, 10);
+cameraFolder.add(camera.position, "x", -10, 10);
+cameraFolder.add(camera.position, "y", -10, 10);
+cameraFolder.open();
+
+const ms = gui.addFolder("miniSphere");
+ms.add(miniSphere.position, "x", -5, 5);
+ms.add(miniSphere.position, "y", -5, 5);
+ms.add(miniSphere.position, "z", -5, 5);
+ms.open();

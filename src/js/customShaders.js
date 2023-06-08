@@ -67,7 +67,7 @@ const DotScreenShader = {
 
 			vec2 uvRandom = vUv;
 			uvRandom.y *= rand(vec2(uvRandom.y, 0.4));
-			color.rgb +=rand(uvRandom)*0.05;
+			color.rgb +=rand(uvRandom)*0.09;
 
 			//float average = ( color.r + color.g + color.b ) / 3.0;
 
