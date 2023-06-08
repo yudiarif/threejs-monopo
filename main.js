@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { DirectionalLight, PointLight } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import gsap from "gsap";
+//import gsap from "gsap";
 import "./style.css";
 
 import vertexShaderBg from "./src/shaders/vertexBg.glsl";
