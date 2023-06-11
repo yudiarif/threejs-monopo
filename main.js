@@ -8,12 +8,16 @@ import vertexShaderBg from "./src/shaders/vertexBg.glsl";
 import fragmentShaderBg from "./src/shaders/fragmentBg.glsl";
 import vertexShaderFresnel from "./src/shaders/vertexFresnel.glsl";
 import fragmentShaderFresnl from "./src/shaders/fragmentFresnel.glsl";
+import { PerspectiveCameraForResizableWindow, handleCameraRotation, handleMouseMovement } from "./src/js/CameraWithMouseRotation.js";
+import CameraOrientationState from "./src/js/CameraOrientationState.js";
 
 import { DotScreenShader } from "./src/js/customShaders";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import GUI from "lil-gui";
+import { gsap } from "gsap";
+//const createInputEvents = require("simple-input-events");
 
 const gui = new GUI();
 ////SCENE
@@ -42,7 +46,7 @@ const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
 });
 
 const cubeCamera = new THREE.CubeCamera(0.1, 10, cubeRenderTarget);
-const fresnelGeometry = new THREE.SphereGeometry(0.7, 64, 64);
+const fresnelGeometry = new THREE.SphereGeometry(0.5, 64, 64);
 const fresnelMaterial = new THREE.ShaderMaterial({
   vertexShader: vertexShaderFresnel,
   fragmentShader: fragmentShaderFresnl,
@@ -76,8 +80,8 @@ scene.add(fillLight);
 
 ////Camera
 const camera = new THREE.PerspectiveCamera(70, sizes.width / sizes.height);
-camera.position.x = -0.37;
-camera.position.y = -0.2;
+camera.position.x = 0;
+camera.position.y = 0;
 camera.position.z = 1.4;
 scene.add(camera);
 
@@ -87,9 +91,9 @@ const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(2);
 renderer.render(scene, camera);
-miniSphere.position.x = 0.24;
-miniSphere.position.y = 0.34;
-miniSphere.position.z = 0.82;
+miniSphere.position.x = 0.38;
+miniSphere.position.y = 0.22;
+miniSphere.position.z = 0.7;
 
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
@@ -101,10 +105,34 @@ composer.addPass(effect1);
 ///Controls
 const controls = new OrbitControls(camera, canvas, mesh);
 controls.enableDamping = true;
-// controls.enablePan = true;
-//controls.enableZoom = false;
-//controls.autoRotate = false;
-//controls.autoRotateSpeed = 1;
+
+//Create a variable to keep track of mouse position
+const mouse = new THREE.Vector2();
+
+//Set up the default cameraOrientationStateObject
+let cameraOrientationState = new CameraOrientationState();
+
+//A function to be called every time the mouse moves
+function onMouseMove(event) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
+
+  handleMouseMovement(mouse.x, mouse.y, cameraOrientationState);
+  console.log(mouse.x, mouse.y);
+}
+
+//Add listener to call onMouseMove every time the mouse moves in the browser window
+document.addEventListener("mousemove", onMouseMove, false);
+
+//A method to be run each time a frame is generated
+function animate() {
+  requestAnimationFrame(animate);
+
+  handleCameraRotation(camera, cameraOrientationState);
+
+  renderer.render(scene, camera);
+}
+animate();
 
 ///Resize for responsive
 window.addEventListener("resize", () => {
@@ -131,8 +159,6 @@ const loop = () => {
 
   window.requestAnimationFrame(loop);
 };
-
-console.log(fresnelMaterial.uniforms.tCube);
 loop();
 
 // GUI
